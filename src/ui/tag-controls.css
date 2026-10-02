@@ -66,3 +66,11 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* 已加入是确认状态，保持绿色的正常对比度，不套用禁用按钮的半透明。 */
+.curated-wishlist-button[data-wishlist-state='added'] {
+  background: var(--curated-success) !important;
+  color: var(--curated-success-foreground) !important;
+  opacity: 1;
+  cursor: default;
+}

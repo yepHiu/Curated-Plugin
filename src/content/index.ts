@@ -1,4 +1,4 @@
-import { initWishlistButtons } from '@/content/wishlist';
+import { initWishlistButtons, refreshWishlistButtons } from '@/content/wishlist';
 import '@/ui/tokens.css';
 import '@/ui/injected.css';
 import { initDetailPage, isDetailPage } from '@/content/detail';
@@ -134,13 +134,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'RESCAN') {
     if (isMissavPage()) {
       initMissavPage({ skipCache: true })
-        .then(() => sendResponse({ ok: true, stats: getMissavScanStats() }))
+        .then(async () => { await refreshWishlistButtons(); sendResponse({ ok: true, stats: getMissavScanStats() }); })
         .catch((err: Error) => sendResponse({ error: err.message }));
       return true;
     }
     if (isJablePage()) {
       initJablePage({ skipCache: true })
-        .then(() => sendResponse({ ok: true, stats: getJableScanStats() }))
+        .then(async () => { await refreshWishlistButtons(); sendResponse({ ok: true, stats: getJableScanStats() }); })
         .catch((err: Error) => sendResponse({ error: err.message }));
       return true;
     }
@@ -148,7 +148,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (isListPage()) tasks.push(runTagging(true));
     if (isDetailPage()) tasks.push(initDetailPage({ skipCache: true }));
     Promise.all(tasks)
-      .then(() => sendResponse({ ok: true, stats: collectScanStats() }))
+      .then(async () => { await refreshWishlistButtons(); sendResponse({ ok: true, stats: collectScanStats() }); })
       .catch((err: Error) => sendResponse({ error: err.message }));
     return true;
   }

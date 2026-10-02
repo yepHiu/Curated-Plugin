@@ -54,7 +54,7 @@ function runtime() {
     '@/utils/messaging': { sendMessage(message) { return new Promise((resolve, reject) => requests.push({ message, resolve, reject })); } },
   }, globals);
   load('src/content/index.ts', {
-    '@/content/missav': app, '@/content/wishlist': { initWishlistButtons() {} },
+    '@/content/missav': app, '@/content/wishlist': { initWishlistButtons() {}, async refreshWishlistButtons() {} },
   }, globals);
   return {
     app, root, title, location, requests, toasts, opened,

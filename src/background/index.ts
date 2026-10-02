@@ -1,4 +1,4 @@
-import { addWishlistCode } from '@/api/wishlist';
+import { addWishlistCode, checkWishlistCodes } from '@/api/wishlist';
 import {
   checkHealth,
   checkMoviesInLibrary,
@@ -44,10 +44,15 @@ chrome.runtime.onInstalled.addListener(() => {
 
 onMessage(async (message: ExtensionMessage, sender) => {
     // 接受本扩展注入的站点内容脚本和固定 popup 手动输入入口。
-    if (message.type === 'ADD_TO_WISHLIST') {
+    if (message.type === 'ADD_TO_WISHLIST' || message.type === 'CHECK_WISHLIST_CODES') {
       const fromPage = !!sender.tab && !!sender.url && /^https:\/\//.test(sender.url);
       const fromPopup = sender.url === chrome.runtime.getURL('popup.html');
       if (sender.id !== chrome.runtime.id || (!fromPage && !fromPopup)) throw new Error('Invalid wishlist sender');
+      if (message.type === 'CHECK_WISHLIST_CODES') {
+        const value = message.payload as { codes?: unknown };
+        if (!value || Object.keys(value).some((key) => key !== 'codes') || !Array.isArray(value.codes) || value.codes.length < 1 || value.codes.length > 500 || value.codes.some((code) => typeof code !== 'string' || !/^[A-Za-z0-9_-]{3,80}$/.test(code))) throw new Error('无效的愿望单查询番号');
+        return checkWishlistCodes((await getSettings()).serverUrl, value.codes as string[]);
+      }
     const value = message.payload as { code?: unknown; sourceUrl?: unknown };
     if (!value || Object.keys(value).some((key) => { /* 仅接受番号和来源网页。 */ return key !== 'code' && key !== 'sourceUrl'; }) || typeof value.code !== 'string' || !/^[A-Za-z0-9_-]{3,80}$/.test(value.code)) throw new Error('未识别出有效番号');
     const { serverUrl } = await getSettings();

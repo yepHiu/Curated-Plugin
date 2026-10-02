@@ -1,71 +1,142 @@
-/** 合成 DOM 验证各卡片番号绑定、重复挂载、错误重试和站点协议一致性。 */
+/** 运行真实公共按钮模块，覆盖同步、重建、重试和请求竞争。 */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');
-/** 最小元素替身只模拟公共按钮模块使用的 DOM 接口。 */
 class Element {
-  /** 创建可观察的卡片或按钮。 */
   constructor(code = '') { this.code = code; this.dataset = {}; this.children = []; this.disabled = false; }
-  /** 查询已经挂载的公共按钮。 */
   querySelector(selector) {
     if (selector === '.curated-tag' || selector === '.curated-banner-status') return this.tag;
     if (selector === ':scope > .curated-wishlist-button') return this.children.find((child) => child.className?.includes('curated-wishlist-button'));
   }
   getAttribute(name) { return name === 'data-code' ? this.code : null; }
-  /** 添加按钮并维护父引用。 */
   append(child) { this.children.push(child); child.parent = this; child.parentElement = this; }
-  /** 插入到入库状态标记之后。 */
   after(child) { const siblings = this.parent.children; siblings.splice(siblings.indexOf(this) + 1, 0, child); child.parent = this.parent; child.parentElement = this.parent; }
-  /** 从宿主中移除旧番号按钮。 */
-  remove() { this.parent.children = this.parent.children.filter((child) => { /* 保留其他按钮。 */ return child !== this; }); }
-  /** 保存真实事件回调供测试点击。 */
+  remove() { if (this.parent) this.parent.children = this.parent.children.filter((child) => child !== this); }
   addEventListener(name, handler) { this[name] = handler; }
 }
-/** 在隔离页面中运行真实公共站点按钮模块。 */
-async function check(hostname, codes, detail = false) {
-  const hosts = codes.map((code) => { /* 每张卡片有独立番号。 */ return new Element(code); });
+function deferred() {
+  let resolve, reject;
+  const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+}
+async function flush() { await new Promise((resolve) => setImmediate(resolve)); }
+const event = { preventDefault() {}, stopPropagation() {} };
+function runtime(hostname, codes, detail = false) {
+  const hosts = codes.map((code) => new Element(code));
   if (hostname === 'javdb.com') for (const host of hosts) {
-    const tags = detail ? host : new Element();
-    const tag = new Element();
-    tags.append(tag);
-    host.tag = tag;
-    if (!detail) host.append(tags);
+    const tags = detail ? host : new Element(); const tag = new Element();
+    tags.append(tag); host.tag = tag; if (!detail) host.append(tags);
   }
   const buttonHost = (host) => hostname === 'javdb.com' && !detail ? host.children[0] : host;
   const buttonOf = (host) => buttonHost(host).querySelector(':scope > .curated-wishlist-button');
-  const calls = []; let observer; let fail = true;
+  const calls = [], toasts = [], members = new Set();
+  let observer, poll, timer, failAdd = false, failSync = false, pendingSync, pendingAdd;
   const sourceUrl = hostname.endsWith('missav.ws') ? `https://${hostname}/dm26/${codes[0].toLowerCase()}` : `https://${hostname}/videos/${codes[0]}/`;
+  const location = { hostname, href: sourceUrl };
+  const documentListeners = new Map(), windowListeners = new Map();
   const exports = {};
-  const js = ts.transpileModule(fs.readFileSync('src/content/wishlist.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const js = ts.transpileModule(fs.readFileSync('src/content/wishlist.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   vm.runInNewContext(js, {
-    exports, location: { hostname, href: sourceUrl },
-    require(name) { /* 隔离现有提取器和 Chrome 消息边界。 */
-      if (name.endsWith('/extract')) return { extractCard: (host) => { /* 返回卡片绑定值。 */ return { code: host.code, link: `https://${hostname}/v/${host.code}` }; } };
-      if (name.endsWith('/detail')) return { isDetailPage: () => { /* 列表页面。 */ return detail; }, extractDetailCode: () => hosts[0].code };
-      if (name.endsWith('/jable')) return { isJableVideoPage: () => { /* jable 详情页。 */ return true; }, extractJableCode: () => { /* 从当前详情提取。 */ return hosts[0].code; } };
+    exports, Error, location,
+    require(name) {
+      if (name.endsWith('/extract')) return { extractCard: (host) => ({ code: host.code, link: `https://${hostname}/v/${host.code}` }) };
+      if (name.endsWith('/detail')) return { isDetailPage: () => detail, extractDetailCode: () => hosts[0].code };
+      if (name.endsWith('/jable')) return { isJableVideoPage: () => true, extractJableCode: () => hosts[0].code };
       if (name.endsWith('/missav')) return { isMissavVideoPage: () => hostname.endsWith('missav.ws'), extractMissavCode: () => hosts[0].code };
-      if (name.endsWith('/messaging')) return { sendMessage: async (message) => { /* 捕获实际按钮发出的 payload。 */ calls.push(JSON.parse(JSON.stringify(message))); if (fail) { fail = false; throw new Error('offline'); } return { result: 'created' }; } };
-      return { showToast() { /* 无可视弹窗依赖。 */ } };
+      if (name.endsWith('/messaging')) return { async sendMessage(message) {
+        calls.push(JSON.parse(JSON.stringify(message)));
+        if (message.type === 'CHECK_WISHLIST_CODES') {
+          if (pendingSync) { const pending = pendingSync; pendingSync = undefined; return pending.promise; }
+          if (failSync) throw new Error('sync offline');
+          return { statusMap: Object.fromEntries(message.payload.codes.map((code) => [code, { added: members.has(code) }])) };
+        }
+        if (pendingAdd) { const pending = pendingAdd; pendingAdd = undefined; return pending.promise; }
+        if (failAdd) { failAdd = false; throw new Error('offline'); }
+        members.add(message.payload.code); return { result: 'created' };
+      } };
+      return { showToast(text) { toasts.push(text); } };
     },
-    document: { body: {}, querySelectorAll() { /* JAVDB 卡片集合。 */ return hosts; }, querySelector() { /* jable 详情容器。 */ return hosts[0]; }, createElement() { /* 创建独立按钮。 */ return new Element(); } },
-    MutationObserver: class { /** 捕获重新扫描入口。 */ constructor(callback) { observer = callback; } /** 无异步 DOM 实现。 */ observe() {} /** 模拟退出。 */ disconnect() {} },
-    setTimeout(callback) { /* 立即执行合成页面变更。 */ callback(); }, clearTimeout() { /* 无挂起定时器。 */ },
-    window: { addEventListener() { /* 测试上下文自动释放。 */ } },
+    document: { body: {}, visibilityState: 'visible', querySelectorAll: () => hosts, querySelector: () => hosts[0], createElement: () => new Element(), addEventListener(name, fn) { documentListeners.set(name, fn); }, removeEventListener(name) { documentListeners.delete(name); } },
+    MutationObserver: class { constructor(callback) { observer = callback; } observe() {} disconnect() { observer = undefined; } },
+    setTimeout(fn) { timer = fn; return 1; }, clearTimeout() { timer = undefined; },
+    setInterval(fn) { poll = fn; return 1; }, clearInterval() { poll = undefined; },
+    window: { addEventListener(name, fn) { windowListeners.set(name, fn); }, removeEventListener(name) { windowListeners.delete(name); } },
   });
-  exports.initWishlistButtons(); observer();
-  for (const host of hosts) {
-    assert.equal(buttonHost(host).children.length, hostname === 'javdb.com' ? 2 : 1);
-    if (hostname === 'javdb.com') assert.equal(buttonHost(host).children[1], buttonOf(host));
-  }
-  const event = { preventDefault() { /* 阻止导航。 */ }, stopPropagation() { /* 阻止卡片事件。 */ } };
-  const first = buttonOf(hosts[0]);
-  await first.click(event); assert.equal(first.disabled, false);
-  await first.click(event); await first.click(event); assert.equal(calls.length, 2);
-  assert.deepEqual(calls[1], { type: 'ADD_TO_WISHLIST', payload: { code: codes[0], sourceUrl: hostname === 'javdb.com' && !detail ? `https://${hostname}/v/${codes[0]}` : sourceUrl } });
-  for (const host of hosts.slice(1)) { await buttonOf(host).click(event); assert.equal(calls.at(-1).payload.code, host.code); assert.equal(calls.at(-1).payload.sourceUrl, `https://${hostname}/v/${host.code}`); }
-  hosts[0].code = 'TEST-999'; observer(); assert.equal(buttonHost(hosts[0]).children.length, hostname === 'javdb.com' ? 2 : 1); assert.equal(buttonOf(hosts[0]).dataset.code, 'TEST-999');
+  return {
+    app: exports, hosts, members, calls, toasts, buttonHost, buttonOf, location,
+    start() { exports.initWishlistButtons(); },
+    mutate() { observer(); const fn = timer; timer = undefined; fn(); },
+    poll() { poll(); },
+    failNextAdd() { failAdd = true; }, failSync(value) { failSync = value; },
+    deferSync() { pendingSync = deferred(); return pendingSync; },
+    deferAdd() { pendingAdd = deferred(); return pendingAdd; },
+    leave() { windowListeners.get('pagehide')(); },
+  };
 }
-/** 三站使用相同公共提交协议。 */
-async function main() { await check('javdb.com', ['TEST-001', 'TEST-002']); await check('jable.tv', ['TEST-003']); await check('javdb.com', ['TEST-004'], true); await check('missav.ws', ['HBAD-643']); await check('www.missav.ws', ['TEST-005']); console.log('Wishlist buttons: passed'); }
-main().catch((error) => { /* 测试失败使 CI 非零退出。 */ console.error(error); process.exitCode = 1; });
+async function checkSite(hostname, codes, detail = false) {
+  const r = runtime(hostname, codes, detail);
+  r.start(); await flush(); r.mutate(); await flush();
+  assert.equal(r.calls.filter((c) => c.type === 'CHECK_WISHLIST_CODES').length, 1, 'DOM render must not poll in a loop');
+  for (const host of r.hosts) {
+    assert.equal(r.buttonHost(host).children.length, hostname === 'javdb.com' ? 2 : 1);
+    assert.equal(r.buttonOf(host).dataset.wishlistState, 'not-added');
+    assert.equal(r.buttonOf(host).disabled, false);
+  }
+  const first = r.buttonOf(r.hosts[0]);
+  r.failNextAdd(); await first.click(event); assert.equal(first.disabled, false);
+  await first.click(event); await first.click(event);
+  const adds = r.calls.filter((c) => c.type === 'ADD_TO_WISHLIST');
+  assert.equal(adds.length, 2);
+  assert.deepEqual(adds[1].payload, { code: codes[0], sourceUrl: hostname === 'javdb.com' && !detail ? `https://${hostname}/v/${codes[0]}` : r.location.href });
+  assert.equal(first.dataset.wishlistState, 'added'); assert.equal(first.textContent, '已加入'); assert.equal(first.disabled, true);
+  first.remove(); r.mutate(); await flush();
+  assert.equal(r.buttonOf(r.hosts[0]).dataset.wishlistState, 'added', 'remount preserves confirmed state');
+  for (const host of r.hosts.slice(1)) { await r.buttonOf(host).click(event); assert.equal(r.calls.at(-1).payload.code, host.code); }
+  r.hosts[0].code = 'TEST-999'; r.mutate(); await flush();
+  assert.equal(r.buttonOf(r.hosts[0]).dataset.code, 'TEST-999');
+  assert.equal(r.buttonOf(r.hosts[0]).dataset.wishlistState, 'not-added');
+  r.leave();
+}
+async function checkSyncAndRaces() {
+  const r = runtime('missav.ws', ['HBAD-643']);
+  r.members.add('HBAD-643'); r.start(); await flush();
+  let button = r.buttonOf(r.hosts[0]);
+  assert.equal(button.dataset.wishlistState, 'added', 'preexisting server wishlist is green');
+  r.members.delete('HBAD-643'); r.poll(); await flush();
+  assert.equal(button.dataset.wishlistState, 'not-added', 'server removal makes button gray and enabled');
+  r.members.add('HBAD-643'); await r.app.refreshWishlistButtons();
+  assert.equal(button.dataset.wishlistState, 'added', 'explicit rescan updates membership');
+  r.failSync(true); await r.app.refreshWishlistButtons();
+  assert.equal(button.dataset.wishlistState, 'unknown'); assert.match(button.title, /状态未确认/);
+  r.failSync(false); r.members.clear(); await r.app.refreshWishlistButtons();
+  const old = r.deferSync(); const sync = r.app.refreshWishlistButtons();
+  await button.click(event);
+  old.resolve({ statusMap: { 'HBAD-643': { added: false } } }); await sync;
+  assert.equal(button.dataset.wishlistState, 'added', 'old negative must not overwrite successful add');
+  r.members.clear(); await r.app.refreshWishlistButtons();
+  const add = r.deferAdd(); const click = button.click(event);
+  assert.equal(button.dataset.wishlistState, 'adding');
+  r.poll(); await flush();
+  r.hosts[0].code = 'TEST-222'; r.mutate(); await flush();
+  add.resolve({ result: 'created' }); await click;
+  button = r.buttonOf(r.hosts[0]);
+  assert.equal(button.dataset.code, 'TEST-222'); assert.equal(button.dataset.wishlistState, 'not-added', 'previous page add cannot recolor current movie');
+  r.leave();
+}
+async function main() {
+  await checkSite('javdb.com', ['TEST-001', 'TEST-002']);
+  await checkSite('jable.tv', ['TEST-003']);
+  await checkSite('javdb.com', ['TEST-004'], true);
+  await checkSite('missav.ws', ['HBAD-643']);
+  await checkSite('www.missav.ws', ['TEST-005']);
+  await checkSyncAndRaces();
+  const duplicate = runtime('javdb.com', ['TEST-111', 'TEST-111']);
+  duplicate.start(); await flush();
+  assert.deepEqual(duplicate.calls[0].payload.codes, ['TEST-111']);
+  await duplicate.buttonOf(duplicate.hosts[0]).click(event);
+  assert.equal(duplicate.buttonOf(duplicate.hosts[1]).dataset.wishlistState, 'added');
+  duplicate.leave();
+  console.log('Wishlist buttons: site payloads, membership sync, removal, remount, retry and stale requests passed');
+}
+main().catch((error) => { console.error(error); process.exitCode = 1; });

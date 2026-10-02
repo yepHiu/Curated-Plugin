@@ -1,5 +1,6 @@
 export type MessageType =
   | 'ADD_TO_WISHLIST'
+  | 'CHECK_WISHLIST_CODES'
   | 'PING'
   | 'GET_TAB_INFO'
   | 'STORAGE_GET'
