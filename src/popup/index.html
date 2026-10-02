@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curated</title>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1 class="title">Curated</h1>
+        <p class="subtitle">JavDB 入库检查</p>
+      </header>
+
+      <section class="info-card" id="server-status" aria-live="polite">
+        <p class="loading">检查服务端...</p>
+      </section>
+
+      <section class="info-card" id="page-status">
+        <p class="loading">读取页面...</p>
+      </section>
+
+      <section class="stats-row" id="scan-stats" hidden>
+        <div class="stat">
+          <span class="stat-value in" id="stat-in">0</span>
+          <span class="stat-label">已入库</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value out" id="stat-out">0</span>
+          <span class="stat-label">未入库</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value error" id="stat-error">0</span>
+          <span class="stat-label">失败</span>
+        </div>
+      </section>
+
+      <section class="actions-primary">
+        <button class="btn btn-primary" id="rescan-btn">重新扫描</button>
+        <button class="btn btn-secondary" id="options-btn">设置</button>
+      </section>
+
+      <div class="danger-slot" id="delete-slot" hidden>
+        <button class="btn btn-danger btn-block" id="delete-btn">
+          删除本页已入库
+        </button>
+      </div>
+
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <form class="info-card" id="wishlist-form">
+        <label for="wishlist-code">加入愿望单</label>
+        <p>页面未识别时，可手动输入番号。</p>
+        <input id="wishlist-code" class="input" type="text" maxlength="80" placeholder="SSIS-001" required autocomplete="off" aria-label="影片番号" />
+        <button type="submit" class="btn btn-secondary btn-block" id="wishlist-submit">加入愿望单</button>
+      </form>
+    </div>
+
+    <div
+      class="confirm-overlay"
+      id="confirm-overlay"
+      hidden
+    >
+      <div
+        class="confirm-dialog"
+        id="confirm-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        aria-describedby="confirm-body"
+      >
+        <h2 id="confirm-title">删除已入库影片</h2>
+        <p id="confirm-body">确定删除本页已入库影片？此操作不可撤销。</p>
+        <div class="confirm-actions">
+          <button type="button" class="btn btn-secondary" id="confirm-cancel">
+            取消
+          </button>
+          <button type="button" class="btn btn-danger" id="confirm-ok">
+            确认删除
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

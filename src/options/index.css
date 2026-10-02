@@ -1,0 +1,130 @@
+@import '../ui/tokens.css';
+@import '../ui/controls.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  font-family: var(--curated-font);
+  background: var(--curated-background);
+  color: var(--curated-foreground);
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--curated-primary);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--curated-muted-foreground);
+  margin-top: 4px;
+}
+
+.card {
+  background: var(--curated-card);
+  color: var(--curated-card-foreground);
+  border: 1px solid var(--curated-border);
+  border-radius: var(--curated-radius-lg);
+  padding: 20px;
+}
+
+.card-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--curated-radius-md);
+  background: color-mix(in srgb, var(--curated-primary) 16%, transparent);
+  color: var(--curated-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  min-width: 0;
+}
+
+.nested {
+  border: 1px solid var(--curated-border);
+  background: color-mix(in srgb, var(--curated-muted) 70%, transparent);
+  border-radius: var(--curated-radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nested + .nested {
+  margin-top: 12px;
+}
+
+.nested-danger {
+  border-color: color-mix(in srgb, var(--curated-danger) 28%, var(--curated-border));
+}
+
+.field-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--curated-foreground);
+}
+
+.hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--curated-muted-foreground);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.actions .btn {
+  flex: 1;
+}

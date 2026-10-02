@@ -1,0 +1,28 @@
+{
+  "name": "curated-plugin",
+  "version": "1.0.0",
+  "description": "Chrome Extension template with TypeScript and Webpack",
+  "private": true,
+  "scripts": {
+    "dev": "webpack --mode development --watch",
+    "build": "webpack --mode production",
+    "generate-icons": "node scripts/generate-icons.js",
+    "type-check": "tsc --noEmit -p tsconfig.check.json",
+    "test:wishlist": "node scripts/wishlist.test.cjs && node scripts/wishlist-buttons.test.cjs",
+    "test:dev-mode": "node scripts/dev-mode.test.cjs",
+    "test:delete": "node scripts/delete-task.test.cjs"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.2",
+    "sharp": "^0.33.5",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  }
+}
+

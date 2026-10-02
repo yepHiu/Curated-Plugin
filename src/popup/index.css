@@ -1,0 +1,147 @@
+@import '../ui/tokens.css';
+@import '../ui/controls.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+  /* 不在扩展窗口四角留透明区，避免露出宿主的黑色底层。 */
+  background: var(--curated-background);
+}
+
+body {
+  width: 360px;
+  font-family: var(--curated-font);
+  background: var(--curated-background);
+  color: var(--curated-foreground);
+  /* 原生弹窗轮廓交给浏览器绘制，页面不叠加第二层外框。 */
+  border: 0;
+}
+
+.container {
+  padding: 16px;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--curated-primary);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--curated-muted-foreground);
+  margin-top: 2px;
+}
+
+.info-card {
+  background: var(--curated-card);
+  color: var(--curated-card-foreground);
+  border: 1px solid var(--curated-border);
+  border-radius: var(--curated-radius);
+  padding: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.info-card .label {
+  color: var(--curated-muted-foreground);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card .value {
+  margin-top: 4px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-card .detail {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--curated-muted-foreground);
+}
+
+.loading {
+  color: var(--curated-muted-foreground);
+  font-size: 13px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+
+.stats-row[hidden] {
+  display: none;
+}
+
+.stat {
+  background: var(--curated-card);
+  border: 1px solid var(--curated-border);
+  border-radius: var(--curated-radius-md);
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--curated-foreground);
+}
+
+.stat-value.in {
+  color: var(--curated-success);
+}
+
+.stat-value.out {
+  color: var(--curated-muted-foreground);
+}
+
+.stat-value.error {
+  color: var(--curated-danger);
+}
+
+.stat-label {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--curated-muted-foreground);
+}
+
+.actions-primary {
+  display: flex;
+  gap: 8px;
+}
+
+.actions-primary .btn {
+  flex: 1;
+}
+
+.danger-slot {
+  margin-top: 8px;
+}
+
+.danger-slot[hidden] {
+  display: none;
+}
+#wishlist-form input {
+  margin: 8px 0;
+}

@@ -1,0 +1,279 @@
+.curated-tag {
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.curated-tag:focus-visible {
+  outline: 2px solid var(--curated-ring) !important;
+  outline-offset: 2px;
+}
+
+.curated-tag-in {
+  background-color: var(--curated-success) !important;
+  color: #fff !important;
+  border-color: var(--curated-success) !important;
+}
+
+.curated-tag-out {
+  background-color: var(--curated-muted-foreground) !important;
+  color: #fff !important;
+  border-color: var(--curated-muted-foreground) !important;
+}
+
+.curated-tag-pending {
+  background-color: var(--curated-warning) !important;
+  color: var(--curated-warning-foreground) !important;
+  border-color: var(--curated-warning) !important;
+  cursor: default;
+}
+
+.curated-tag-error {
+  background-color: var(--curated-danger) !important;
+  color: #fff !important;
+  border-color: var(--curated-danger) !important;
+  cursor: default;
+}
+
+#videos .item .tags > .curated-wishlist-button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--curated-primary) !important;
+  background: var(--curated-primary) !important;
+  color: var(--curated-primary-foreground) !important;
+  font-family: var(--curated-font);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+#videos .item .tags > .curated-wishlist-button:focus-visible {
+  outline: 2px solid var(--curated-ring);
+  outline-offset: 2px;
+}
+
+.curated-detail-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: var(--curated-radius-md);
+  border: 1px solid var(--curated-border);
+  background: var(--curated-background);
+  color: var(--curated-foreground);
+  font-family: var(--curated-font);
+  font-size: 13px;
+}
+
+.curated-banner-spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+.curated-detail-banner .curated-banner-status {
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.curated-detail-banner .curated-banner-status.in {
+  color: var(--curated-success);
+}
+
+.curated-detail-banner .curated-banner-status.out {
+  color: var(--curated-muted-foreground);
+}
+
+.curated-detail-banner .curated-banner-status.pending {
+  color: var(--curated-warning);
+}
+
+.curated-detail-banner .curated-banner-status.error {
+  color: var(--curated-danger);
+}
+
+.curated-detail-banner .curated-banner-code {
+  color: var(--curated-muted-foreground);
+  font-size: 12px;
+}
+
+.curated-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--curated-radius-md);
+  font-family: var(--curated-font);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none !important;
+  cursor: pointer;
+  background: var(--curated-primary) !important;
+  color: var(--curated-primary-foreground) !important;
+}
+
+.curated-banner-btn:hover {
+  filter: brightness(0.96);
+}
+
+.curated-banner-btn:focus-visible {
+  outline: 2px solid var(--curated-ring);
+  outline-offset: 2px;
+}
+
+.curated-banner-btn.secondary {
+  background: var(--curated-secondary);
+  color: var(--curated-secondary-foreground);
+}
+
+.curated-remove-hint {
+  margin-top: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--curated-success);
+  background: color-mix(in srgb, var(--curated-success) 12%, transparent);
+  border-radius: var(--curated-radius-sm);
+  text-align: center;
+}
+
+.curated-guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--curated-overlay);
+  z-index: 2147483646;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.curated-guide-modal {
+  width: 100%;
+  max-width: 360px;
+  background: var(--curated-card);
+  color: var(--curated-card-foreground);
+  border-radius: var(--curated-radius);
+  padding: 20px;
+  font-family: var(--curated-font);
+  border: 1px solid var(--curated-border);
+}
+
+.curated-guide-modal h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--curated-primary);
+}
+
+.curated-guide-modal p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--curated-muted-foreground);
+  line-height: 1.5;
+}
+
+.curated-guide-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.curated-host-dark {
+  --curated-background: #141826;
+  --curated-foreground: #f8f7fb;
+  --curated-primary: #fe628e;
+  --curated-primary-foreground: #1d0910;
+  --curated-success: #8fd6bf;
+  --curated-warning: #f5b971;
+  --curated-warning-foreground: #2b1600;
+  --curated-danger: #ff6f87;
+  --curated-secondary: #1b2234;
+  --curated-secondary-foreground: #f7f5fb;
+  --curated-muted-foreground: #a2abc2;
+  --curated-border: rgb(255 255 255 / 10%);
+  --curated-ring: rgb(254 98 142 / 45%);
+}
+
+.curated-jable-titlebar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 4px;
+  font-family: var(--curated-font);
+}
+
+.curated-jable-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none !important;
+  border: none;
+}
+
+.curated-jable-status.pending {
+  background: var(--curated-warning) !important;
+  color: var(--curated-warning-foreground) !important;
+}
+
+.curated-jable-status.in {
+  background: var(--curated-success) !important;
+  color: #08140f !important;
+  cursor: pointer;
+}
+
+.curated-jable-status.out {
+  background: var(--curated-muted-foreground) !important;
+  color: #fff !important;
+}
+
+.curated-jable-status.error {
+  background: var(--curated-danger) !important;
+  color: #fff !important;
+}
+
+.curated-jable-status:focus-visible,
+.curated-jable-link:focus-visible {
+  outline: 2px solid var(--curated-ring);
+  outline-offset: 2px;
+}
+
+.curated-jable-link {
+  background: var(--curated-primary) !important;
+  color: var(--curated-primary-foreground) !important;
+}
+
+.curated-detail-banner .curated-banner-btn {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.curated-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background: var(--curated-foreground);
+  color: var(--curated-background);
+  font-size: 13px;
+  border-radius: var(--curated-radius-md);
+  z-index: 2147483647;
+  font-family: var(--curated-font);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curated-banner-btn {
+    transition: none;
+  }
+}

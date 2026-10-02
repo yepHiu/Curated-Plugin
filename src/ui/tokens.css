@@ -1,0 +1,100 @@
+:root {
+  /* 外层、卡片和控件使用统一圆角层级。 */
+  --curated-radius-lg: 20px;
+  --curated-radius: 16px;
+  --curated-radius-sm: 10px;
+  --curated-radius-md: 12px;
+  --curated-font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --curated-background: #f4f6fc;
+  --curated-foreground: #0f1219;
+  --curated-card: #ffffff;
+  --curated-card-foreground: #0f1219;
+  --curated-primary: #fe628e;
+  --curated-primary-foreground: #1d0910;
+  --curated-success: #2f9e78;
+  --curated-success-foreground: #071b14;
+  --curated-warning: #d89a1b;
+  --curated-warning-foreground: #231703;
+  --curated-danger: #e14b6d;
+  --curated-danger-foreground: #25070f;
+  --curated-secondary: #e8ecf6;
+  --curated-secondary-foreground: #1a1f2e;
+  --curated-muted: #ebeef5;
+  --curated-muted-foreground: #5a6378;
+  --curated-border: rgb(15 18 25 / 9%);
+  --curated-border-strong: rgb(15 18 25 / 16%);
+  --curated-ring: rgb(254 98 142 / 42%);
+  --curated-overlay: rgb(13 15 26 / 45%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --curated-background: #0d0f1a;
+    --curated-foreground: #f8f7fb;
+    --curated-card: #141826;
+    --curated-card-foreground: #f8f7fb;
+    --curated-primary: #fe628e;
+    --curated-primary-foreground: #1d0910;
+    --curated-success: #8fd6bf;
+    --curated-success-foreground: #08140f;
+    --curated-warning: #f5b971;
+    --curated-warning-foreground: #2b1600;
+    --curated-danger: #ff6f87;
+    --curated-danger-foreground: #2b0811;
+    --curated-secondary: #1b2234;
+    --curated-secondary-foreground: #f7f5fb;
+    --curated-muted: #121827;
+    --curated-muted-foreground: #a2abc2;
+    --curated-border: rgb(255 255 255 / 10%);
+    --curated-border-strong: rgb(255 255 255 / 18%);
+    --curated-ring: rgb(254 98 142 / 45%);
+    --curated-overlay: rgb(0 0 0 / 55%);
+  }
+}
+
+html[data-theme='light'] {
+  --curated-background: #f4f6fc;
+  --curated-foreground: #0f1219;
+  --curated-card: #ffffff;
+  --curated-card-foreground: #0f1219;
+  --curated-primary: #fe628e;
+  --curated-primary-foreground: #1d0910;
+  --curated-success: #2f9e78;
+  --curated-success-foreground: #071b14;
+  --curated-warning: #d89a1b;
+  --curated-warning-foreground: #231703;
+  --curated-danger: #e14b6d;
+  --curated-danger-foreground: #25070f;
+  --curated-secondary: #e8ecf6;
+  --curated-secondary-foreground: #1a1f2e;
+  --curated-muted: #ebeef5;
+  --curated-muted-foreground: #5a6378;
+  --curated-border: rgb(15 18 25 / 9%);
+  --curated-border-strong: rgb(15 18 25 / 16%);
+  --curated-ring: rgb(254 98 142 / 42%);
+  --curated-overlay: rgb(13 15 26 / 45%);
+}
+
+html[data-theme='dark'] {
+  --curated-background: #0d0f1a;
+  --curated-foreground: #f8f7fb;
+  --curated-card: #141826;
+  --curated-card-foreground: #f8f7fb;
+  --curated-primary: #fe628e;
+  --curated-primary-foreground: #1d0910;
+  --curated-success: #8fd6bf;
+  --curated-success-foreground: #08140f;
+  --curated-warning: #f5b971;
+  --curated-warning-foreground: #2b1600;
+  --curated-danger: #ff6f87;
+  --curated-danger-foreground: #2b0811;
+  --curated-secondary: #1b2234;
+  --curated-secondary-foreground: #f7f5fb;
+  --curated-muted: #121827;
+  --curated-muted-foreground: #a2abc2;
+  --curated-border: rgb(255 255 255 / 10%);
+  --curated-border-strong: rgb(255 255 255 / 18%);
+  --curated-ring: rgb(254 98 142 / 45%);
+  --curated-overlay: rgb(0 0 0 / 55%);
+}
