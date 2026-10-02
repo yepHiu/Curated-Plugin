@@ -1,6 +1,7 @@
 import './index.css';
 import type { WishlistReceipt } from '@/api/wishlist';
 import type { ScanStats } from '@/types/movie';
+import { extractMissavCodeFromUrl, isMissavHost } from '@/utils/missav-url';
 import { waitForDeleteResult, type DeleteTask } from '@/utils/delete-task';
 import { setButtonBusy } from '@/ui/button-state';
 import {
@@ -136,6 +137,28 @@ async function loadPageStatus(tab: TabInfo): Promise<void> {
   renderScanStats(null);
   setPrimaryMode('rescan');
 
+  if (isMissavHost(hostname)) {
+    const code = tab.url ? extractMissavCodeFromUrl(tab.url) : '';
+    if (!code) {
+      renderInfoCard(pageStatusEl, '当前页面', 'MissAV', '请打开影片详情页');
+      rescanBtn.disabled = true;
+      return;
+    }
+    let detail = `${code} · 请刷新页面后重试`;
+    rescanBtn.disabled = !tab.id;
+    if (tab.id) {
+      try {
+        const stats = await sendTabMessage<ScanStats>(tab.id, { type: 'GET_SCAN_STATS' });
+        const labels = { in: '已入库', out: '未入库', pending: '查询中', error: '查询失败' };
+        detail = `${code} · ${stats.detailStatus ? labels[stats.detailStatus] : '等待影片标题加载'}`;
+      } catch {
+        rescanBtn.disabled = true;
+      }
+    }
+    renderInfoCard(pageStatusEl, '当前页面', 'MissAV 影片页', detail);
+    return;
+  }
+
   if (isJable) {
     const code = tab.url ? extractJableCodeFromUrl(tab.url) : '';
     if (!code) {
@@ -170,7 +193,7 @@ async function loadPageStatus(tab: TabInfo): Promise<void> {
       pageStatusEl,
       '当前页面',
       '非目标页面',
-      '请打开 JavDB 或 Jable 影片页'
+      '请打开 JavDB、Jable 或 MissAV 影片页'
     );
     rescanBtn.disabled = true;
     return;

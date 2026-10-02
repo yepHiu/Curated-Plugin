@@ -59,7 +59,7 @@ export interface DeleteResult {
 }
 
 export interface ScanStats {
-  page: 'list' | 'detail' | 'jable' | 'other';
+  page: 'list' | 'detail' | 'jable' | 'missav' | 'other';
   total: number;
   withCode: number;
   inLibrary: number;

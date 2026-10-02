@@ -12,6 +12,7 @@ class Element {
     if (selector === '.curated-tag' || selector === '.curated-banner-status') return this.tag;
     if (selector === ':scope > .curated-wishlist-button') return this.children.find((child) => child.className?.includes('curated-wishlist-button'));
   }
+  getAttribute(name) { return name === 'data-code' ? this.code : null; }
   /** 添加按钮并维护父引用。 */
   append(child) { this.children.push(child); child.parent = this; child.parentElement = this; }
   /** 插入到入库状态标记之后。 */
@@ -34,14 +35,16 @@ async function check(hostname, codes, detail = false) {
   const buttonHost = (host) => hostname === 'javdb.com' && !detail ? host.children[0] : host;
   const buttonOf = (host) => buttonHost(host).querySelector(':scope > .curated-wishlist-button');
   const calls = []; let observer; let fail = true;
+  const sourceUrl = hostname.endsWith('missav.ws') ? `https://${hostname}/dm26/${codes[0].toLowerCase()}` : `https://${hostname}/videos/${codes[0]}/`;
   const exports = {};
   const js = ts.transpileModule(fs.readFileSync('src/content/wishlist.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
   vm.runInNewContext(js, {
-    exports, location: { hostname, href: `https://${hostname}/videos/${codes[0]}/` },
+    exports, location: { hostname, href: sourceUrl },
     require(name) { /* 隔离现有提取器和 Chrome 消息边界。 */
       if (name.endsWith('/extract')) return { extractCard: (host) => { /* 返回卡片绑定值。 */ return { code: host.code, link: `https://${hostname}/v/${host.code}` }; } };
       if (name.endsWith('/detail')) return { isDetailPage: () => { /* 列表页面。 */ return detail; }, extractDetailCode: () => hosts[0].code };
       if (name.endsWith('/jable')) return { isJableVideoPage: () => { /* jable 详情页。 */ return true; }, extractJableCode: () => { /* 从当前详情提取。 */ return hosts[0].code; } };
+      if (name.endsWith('/missav')) return { isMissavVideoPage: () => hostname.endsWith('missav.ws'), extractMissavCode: () => hosts[0].code };
       if (name.endsWith('/messaging')) return { sendMessage: async (message) => { /* 捕获实际按钮发出的 payload。 */ calls.push(JSON.parse(JSON.stringify(message))); if (fail) { fail = false; throw new Error('offline'); } return { result: 'created' }; } };
       return { showToast() { /* 无可视弹窗依赖。 */ } };
     },
@@ -59,10 +62,10 @@ async function check(hostname, codes, detail = false) {
   const first = buttonOf(hosts[0]);
   await first.click(event); assert.equal(first.disabled, false);
   await first.click(event); await first.click(event); assert.equal(calls.length, 2);
-  assert.deepEqual(calls[1], { type: 'ADD_TO_WISHLIST', payload: { code: codes[0], sourceUrl: hostname === 'javdb.com' && !detail ? `https://${hostname}/v/${codes[0]}` : `https://${hostname}/videos/${codes[0]}/` } });
+  assert.deepEqual(calls[1], { type: 'ADD_TO_WISHLIST', payload: { code: codes[0], sourceUrl: hostname === 'javdb.com' && !detail ? `https://${hostname}/v/${codes[0]}` : sourceUrl } });
   for (const host of hosts.slice(1)) { await buttonOf(host).click(event); assert.equal(calls.at(-1).payload.code, host.code); assert.equal(calls.at(-1).payload.sourceUrl, `https://${hostname}/v/${host.code}`); }
   hosts[0].code = 'TEST-999'; observer(); assert.equal(buttonHost(hosts[0]).children.length, hostname === 'javdb.com' ? 2 : 1); assert.equal(buttonOf(hosts[0]).dataset.code, 'TEST-999');
 }
-/** 两站使用相同公共提交协议。 */
-async function main() { await check('javdb.com', ['TEST-001', 'TEST-002']); await check('jable.tv', ['TEST-003']); await check('javdb.com', ['TEST-004'], true); console.log('Wishlist buttons: passed'); }
+/** 三站使用相同公共提交协议。 */
+async function main() { await check('javdb.com', ['TEST-001', 'TEST-002']); await check('jable.tv', ['TEST-003']); await check('javdb.com', ['TEST-004'], true); await check('missav.ws', ['HBAD-643']); await check('www.missav.ws', ['TEST-005']); console.log('Wishlist buttons: passed'); }
 main().catch((error) => { /* 测试失败使 CI 非零退出。 */ console.error(error); process.exitCode = 1; });

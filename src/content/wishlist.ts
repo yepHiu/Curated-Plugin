@@ -1,12 +1,21 @@
 import { extractCard } from '@/content/extract';
 import { extractDetailCode, isDetailPage } from '@/content/detail';
 import { extractJableCode, isJableVideoPage } from '@/content/jable';
+import { extractMissavCode, isMissavVideoPage } from '@/content/missav';
 import { sendMessage } from '@/utils/messaging';
 import { showToast } from '@/content/styles';
 import type { WishlistReceipt } from '@/api/wishlist';
 interface WishlistTarget { code: string; host: Element; sourceUrl?: string; anchor?: Element; compact?: boolean }
 interface WishlistSiteAdapter { matches(): boolean; targets(): WishlistTarget[] }
 const adapters: WishlistSiteAdapter[] = [
+  {
+    matches() { return isMissavVideoPage(); },
+    targets() {
+      const host = document.querySelector('#curated-missav-titlebar');
+      return host && host.getAttribute('data-code') === extractMissavCode()
+        ? [{ host, code: extractMissavCode(), sourceUrl: location.href }] : [];
+    },
+  },
   {
     /** JAVDB 页面使用既有提取逻辑。 */
     matches() { return /(^|\.)javdb\.com$/i.test(location.hostname); },

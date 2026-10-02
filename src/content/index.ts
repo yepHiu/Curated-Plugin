@@ -4,6 +4,7 @@ import '@/ui/injected.css';
 import { initDetailPage, isDetailPage } from '@/content/detail';
 import { extractAllCards } from '@/content/extract';
 import { initJablePage, isJablePage, getJableScanStats } from '@/content/jable';
+import { initMissavPage, isMissavPage, getMissavScanStats } from '@/content/missav';
 import { showToast } from '@/content/styles';
 import {
   collectScanStats,
@@ -59,6 +60,10 @@ function scheduleTagging(): void {
 }
 
 async function init(): Promise<void> {
+  if (isMissavPage()) {
+    await initMissavPage();
+    return;
+  }
   if (isJablePage()) {
     console.log('[Curated Plugin] Content script active on', window.location.href);
     await initJablePage();
@@ -127,6 +132,12 @@ async function startBatchDelete(task: DeleteTask): Promise<{ started: boolean; t
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'RESCAN') {
+    if (isMissavPage()) {
+      initMissavPage({ skipCache: true })
+        .then(() => sendResponse({ ok: true, stats: getMissavScanStats() }))
+        .catch((err: Error) => sendResponse({ error: err.message }));
+      return true;
+    }
     if (isJablePage()) {
       initJablePage({ skipCache: true })
         .then(() => sendResponse({ ok: true, stats: getJableScanStats() }))
@@ -152,7 +163,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
   if (message.type === 'GET_SCAN_STATS') {
-    sendResponse(isJablePage() ? getJableScanStats() : collectScanStats());
+    sendResponse(isMissavPage() ? getMissavScanStats() : isJablePage() ? getJableScanStats() : collectScanStats());
     return true;
   }
   return false;

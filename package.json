@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit -p tsconfig.check.json",
     "test:wishlist": "node scripts/wishlist.test.cjs && node scripts/wishlist-buttons.test.cjs",
     "test:dev-mode": "node scripts/dev-mode.test.cjs",
+    "test:missav": "node scripts/missav.test.cjs",
     "test:delete": "node scripts/delete-task.test.cjs"
   },
   "devDependencies": {
