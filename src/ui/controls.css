@@ -1,58 +1,9 @@
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: var(--curated-radius-md);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.2;
-  cursor: pointer;
-  transition: background 0.15s ease, opacity 0.15s ease;
-}
+@import './tag-controls.css';
 
-.btn:disabled,
-.btn[aria-busy='true'] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn:focus-visible,
 .input:focus-visible,
 .toggle:focus-within .slider {
   outline: 2px solid var(--curated-ring);
   outline-offset: 2px;
-}
-
-.btn-primary {
-  background: var(--curated-primary);
-  color: var(--curated-primary-foreground);
-}
-
-.btn-primary:hover:not(:disabled) {
-  filter: brightness(0.96);
-}
-
-.btn-secondary {
-  background: var(--curated-secondary);
-  color: var(--curated-secondary-foreground);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  filter: brightness(0.97);
-}
-
-.btn-danger {
-  background: var(--curated-danger);
-  color: #fff;
-}
-
-.btn-danger:hover:not(:disabled) {
-  filter: brightness(0.95);
 }
 
 .btn-block {

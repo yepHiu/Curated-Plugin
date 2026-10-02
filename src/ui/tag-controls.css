@@ -1,0 +1,68 @@
+/* 操作按钮与「未入库」标签共用尺寸及外观，避免宿主站点按钮规则干扰。 */
+.curated-tag,
+.curated-jable-chip,
+.curated-banner-btn,
+.curated-wishlist-button,
+:where(html[data-curated-ui]) .btn {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;
+  min-height: 28px !important;
+  height: auto !important;
+  padding: 4px 10px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  font-family: var(--curated-font) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap;
+  text-decoration: none !important;
+}
+
+.curated-tag-out,
+.curated-jable-status.out,
+.curated-jable-link,
+.curated-banner-btn,
+.curated-wishlist-button,
+:where(html[data-curated-ui]) .btn {
+  background: var(--curated-muted-foreground) !important;
+  color: #fff !important;
+}
+
+.curated-banner-btn,
+.curated-wishlist-button,
+.curated-jable-link,
+:where(html[data-curated-ui]) .btn {
+  cursor: pointer;
+}
+
+.curated-tag[role='button']:hover,
+.curated-jable-chip[role='button']:hover,
+.curated-banner-btn:hover:not(:disabled),
+.curated-wishlist-button:hover:not(:disabled),
+.curated-jable-link:hover,
+:where(html[data-curated-ui]) .btn:hover:not(:disabled):not([aria-busy='true']) {
+  filter: brightness(0.94);
+}
+
+.curated-tag:focus-visible,
+.curated-jable-chip:focus-visible,
+.curated-banner-btn:focus-visible,
+.curated-wishlist-button:focus-visible,
+:where(html[data-curated-ui]) .btn:focus-visible {
+  outline: 2px solid var(--curated-ring) !important;
+  outline-offset: 2px;
+}
+
+.curated-banner-btn:disabled,
+.curated-wishlist-button:disabled,
+:where(html[data-curated-ui]) .btn:disabled,
+:where(html[data-curated-ui]) .btn[aria-busy='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
