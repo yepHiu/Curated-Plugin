@@ -1,5 +1,9 @@
 # Curated 后端 API 使用指南
 
+## 浏览器插件愿望单状态同步（2026-10-02）
+
+新版 Server 提供 `POST /api/integrations/wishlist/status`，无需令牌，受 `browserPluginEnabled` 控制。请求严格为 `{ "codes": ["HBAD-643", "SSIS-001"] }`，每批 1–100 个番号；响应 `{ "statusMap": { "HBAD-643": { "added": true }, "SSIS-001": { "added": false } } }`。按愿望单去重键匹配常见别名，包括已完成/已入库条目；删除后为 false。只读、不触发添加或刮削，不返回条目资料、备注、来源或图片，响应 `Cache-Control: no-store`。关闭联动返回 `403 BROWSER_PLUGIN_DISABLED`；无效参数返回 `400 WISHLIST_INVALID_INPUT`。普通 `/api/wishlist/items` 列表/详情仍受应用 PIN 和 Origin 保护，插件应使用此有限状态入口。
+
 本文档是 Curated 仓库的公开 HTTP API 指南，用于当前 Web 前端、后续 Android App、局域网客户端以及其他衍生项目对接同一个 Go 后端。
 
 本文只描述当前 Go HTTP 后端已经实现的接口，不引入新 API 行为。
