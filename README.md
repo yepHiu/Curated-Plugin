@@ -1,6 +1,6 @@
 # Curated Plugin
 
-基于 **TypeScript + Webpack** 的 Chrome 插件（Manifest V3）工程模板。
+基于 **TypeScript + Webpack** 的 Chrome 插件（Manifest V3），支持在 JavDB、Jable 与 MissAV 页面检查 Curated 入库状态、加入愿望单。
 
 ## 功能概览
 
@@ -130,12 +130,20 @@ onMessage(async (message) => { /* ... */ });
 1. 在更新后的 Curated 打开「设置 → 网络 → 浏览器插件联动」，开启「允许浏览器插件联动」。默认关闭，保存后立即生效并在重启后保留。
 2. 在本插件设置中填写 Curated 服务地址，无需凭证。开发服务常用 `http://127.0.0.1:8080`，桌面版常用 `http://127.0.0.1:8081`，以实际监听为准。
 3. `npm run build` 后在 Chrome 扩展管理页重新加载 `dist/`。
-4. JAVDB 列表卡片/详情或 jable 详情页点击「加入愿望单」。自动保存对应影片来源页（JAVDB 列表保存卡片详情地址）。Curated 详情在元数据来源后显示 JAVDB/Jable 等站点名链接。页面没有提取出番号时，可在插件弹窗中手动输入，此入口不猜来源页。需配合支持 sourceUrl 的新版 Curated 后端；更新后重新加载扩展和网页。
+4. JAVDB 列表卡片/详情、Jable 或 MissAV 详情页点击「加入愿望单」。自动保存对应影片来源页（JAVDB 列表保存卡片详情地址）。Curated 详情在元数据来源后显示站点名链接。页面没有提取出番号时，可在插件弹窗中手动输入，此入口不猜来源页。需配合支持 sourceUrl 的新版 Curated 后端；更新后重新加载扩展和网页。
 
-请求始终只有 `{ "code": "SSIS-001" }`，发送到 `POST /api/integrations/wishlist/items`。Curated 后台查询资料、保存图片；插件不上传标题、图片、cookies 或影片。重复添加显示已有状态，成功接收不代表资料已经补全。
+请求包含番号及可选来源页，例如 `{ "code": "SSIS-001", "sourceUrl": "https://missav.ws/ssis-001" }`，发送到 `POST /api/integrations/wishlist/items`。手动输入时只发送番号。Curated 后台查询资料、保存图片；插件不上传标题、图片、cookies 或影片。重复添加显示已有状态，成功接收不代表资料已经补全。
 
 插件不再保存或发送愿望单凭证。关闭 Curated 的插件联动后，后端拒绝插件请求并返回 `403 BROWSER_PLUGIN_DISABLED`；插件会提示到网络设置开启，已有愿望单不受影响。
 
-扩展站点时，在 `src/content/wishlist.ts` 的 adapters 中增加 `matches` 与 `targets`，targets 只返回 `code` 和按钮宿主 `host`；同时更新 manifest 站点匹配权限。公共按钮、后台提交和 API 协议无需复制。当前自动适配 JAVDB 与 jable，并不自动支持任意网站。
+扩展站点时，在 `src/content/wishlist.ts` 的 adapters 中增加 `matches` 与 `targets`，targets 返回 `code`、按钮宿主 `host` 与可选来源页 `sourceUrl`；同时更新 manifest 站点匹配权限。公共按钮、后台提交和 API 协议无需复制。当前自动适配 JAVDB、Jable 与 `missav.ws` 及其子域名。
 
 验证：`npm run type-check`、`npm run build`、`npm run test:wishlist`。后者包含真实发送函数的协议测试，以及公共按钮在合成 DOM 上的番号绑定、防重和重试测试；真实站点加载扩展的完整链路仍需验收。
+
+## MissAV 详情页（2026-10-02）
+
+支持 `https://missav.ws/dm26/hbad-643` 这样的影片详情页，也识别直接影片路径、语言前缀和常见无修正/字幕后缀。从网址提取 `HBAD-643`，核对当前影片标题后，在标题下显示入库状态、JavDB 搜索和「加入愿望单」。已入库状态可点击打开 Curated；查询失败显示错误，不当作未入库。
+
+插件弹窗显示「MissAV 影片页」和入库状态，「重新扫描」跳过缓存重新查询。愿望单保存当前 MissAV 影片页为来源地址。分类、搜索及演员页面不查询，MissAV 列表卡片和其他镜像域名暂不自动适配。
+
+更新后运行 `npm run build`，在 `chrome://extensions/` 重新加载插件，再刷新 MissAV 页面。`npm run test:missav` 验证网址边界、动态标题挂载、重新扫描、错误状态和旧请求隔离；`npm run test:wishlist` 包含 MissAV 的来源地址、重复挂载和失败重试。
