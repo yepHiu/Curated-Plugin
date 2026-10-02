@@ -2,6 +2,8 @@
 
 基于 **TypeScript + Webpack** 的 Chrome 插件（Manifest V3），支持在 JavDB、Jable 与 MissAV 页面检查 Curated 入库状态、加入愿望单。
 
+网页操作按钮、弹窗和设置页按钮统一沿用「未入库」标签的灰底白字胶囊样式，入库、查询中及查询失败标签保留各自状态颜色。
+
 ## 功能概览
 
 | 模块 | 说明 |
